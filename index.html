@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Składy produktów – Lada tradycyjna</title>
+  <meta name="description" content="Kafelki produktów z lady tradycyjnej. Kliknij, aby zobaczyć skład i wartości odżywcze." />
+  <meta name="color-scheme" content="dark light">
+  <style>
+    /* ===== THEME ===== */
+    :root{
+      --bg:#0b0c10;
+      --panel:#111317;
+      --muted:#b9c2d0;
+      --text:#e8eaed;
+      --accent:#ffd100;
+      --brand:#e4002b;
+      --card:#161922;
+      --ring:#2b2f39;
+      --shadow: 0 8px 24px rgba(0,0,0,.35);
+      --focus: 2px solid var(--accent);
+      --radius:16px;
+    }
+    @media (prefers-color-scheme:light){
+      :root{
+        --bg:#f6f7fb;
+        --panel:#ffffff;
+        --muted:#46505c;
+        --text:#0f1720;
+        --card:#ffffff;
+        --ring:#e6e8ee;
+        --shadow: 0 8px 18px rgba(13,19,33,.12);
+        --focus: 2px solid #0b0c10;
+      }
+    }
+
+    /* ===== BASE ===== */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background: linear-gradient(rgba(7,8,12,.70),rgba(7,8,12,.70)), url('tlo.jpg') center/cover no-repeat fixed;
+    }
+
+    /* Podniesione, żeby logo/napisy były centralnie w czerwonym pasku */
+    .wrap{max-width:1120px;margin:0 auto;padding:12px 28px 28px}
+
+    /* ===== HEADER STRIP ===== */
+    .header-bg{
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 1200px; height: 75px;
+      background-color: rgba(213, 13, 13, 0.85);
+      border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.4);
+      z-index: 0;
+    }
+
+    /* Header wyśrodkowany w pionie paska */
+    header{
+      position:relative; z-index:1;
+      display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+      min-height:75px; padding:0; margin-bottom:18px;
+    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{width:44px;height:44px;border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+    .logo img{width:100%;height:100%;object-fit:cover;display:block}
+    .title{font-weight:800;letter-spacing:.2px;font-size:22px;text-shadow:0 1px 0 rgba(0,0,0,.15)}
+    .subtitle{color:var(--muted);font-size:12px}
+
+    /* ===== TABBAR ===== */
+    .tabbar{display:flex; gap:8px; margin:8px 0 0; align-items:center; flex-wrap:wrap}
+    .tab{
+      appearance:none; border:1px solid var(--ring); background:var(--card); color:var(--text);
+      border-radius:999px; padding:8px 12px; font-weight:600; cursor:pointer;
+      transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .tab[aria-selected="true"]{ background:var(--accent); color:#111; border-color:#e9c400; }
+    .tab:focus-visible{ outline:var(--focus); outline-offset:3px }
+
+    /* ===== TOOLBAR (w produktach) ===== */
+    .toolbar{display:flex;gap:10px;align-items:center;margin-left:auto;flex-wrap:wrap}
+    .input{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--ring);border-radius:12px;padding:10px 12px;min-width:270px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.03)}
+    .input input{flex:1;background:transparent;border:0;color:var(--text);outline:none;font-size:14px}
+    .btn{cursor:pointer;border:1px solid var(--ring);background:var(--card);color:var(--text);border-radius:12px;padding:10px 14px;font-weight:600;transition:transform .15s ease, filter .15s ease, box-shadow .15s ease}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.28)}
+    .btn:focus-visible{outline:var(--focus);outline-offset:3px}
+    .chip{border:1px solid var(--ring);background:var(--card);color:var(--text);border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer;transition:background .15s ease, transform .15s ease}
+    .chip:hover{transform:translateY(-1px)}
+    .chip[aria-pressed="true"]{background:var(--accent);color:#111;border-color:#e9c400}
+    .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+    .filters::-webkit-scrollbar{display:none}
+
+    /* ===== GRID / CARD (produkty) ===== */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:12px}
+    .card{
+      position:relative;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),var(--card);
+      border:1px solid var(--ring);border-radius:var(--radius);overflow:hidden;cursor:pointer;
+      box-shadow:var(--shadow);transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .card:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(0,0,0,.40)}
+    .card:focus-visible{outline:var(--focus);outline-offset:4px}
+    .card-img{aspect-ratio:4/3;background:#0f1117;display:grid;place-items:center;overflow:hidden}
+    .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+    .card:hover .card-img img{transform:scale(1.04)}
+    .card-body{padding:12px 12px 14px}
+    .card h3{margin:0 0 6px;font-size:15.5px;line-height:1.25}
+    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#0e1017;color:var(--muted);border:1px solid var(--ring);padding:6px 8px;border-radius:999px}
+    mark{background:#ffe072;color:#111;padding:0 .15em;border-radius:3px}
+
+    /* ===== SUPPLIERS VIEW (z logo) ===== */
+    .suppliers{display:grid; grid-template-columns:1fr; gap:14px; margin-top:12px}
+    .sup-card{
+      background:var(--card); border:1px solid var(--ring); border-radius:var(--radius);
+      padding:16px; box-shadow:var(--shadow);
+    }
+    .sup-card__head{display:flex; align-items:center; gap:12px; margin:0 0 8px}
+    .sup-card__logo{
+      width:44px; height:44px; border-radius:10px; overflow:hidden;
+      border:1px solid var(--ring); background:#0f1117; flex:0 0 auto;
+    }
+    .sup-card__logo img{width:100%; height:100%; object-fit:cover; display:block}
+    .sup-card h3{margin:0; font-size:18px; line-height:1.2}
+    .sup-card p{margin:6px 0 0; color:var(--muted); line-height:1.55}
+
+    /* ===== MODAL ===== */
+    .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.52);backdrop-filter:blur(3px);padding:18px;z-index:50}
+    .modal.open{display:grid}
+    .sheet{width:min(880px,96vw);background:var(--panel);border:1px solid var(--ring);border-radius:18px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,.5)}
+    .sheet-head{display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border-bottom:1px solid var(--ring)}
+    .pill{background:#0e1017;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px}
+    .close{margin-left:auto;cursor:pointer;background:transparent;border:0;color:var(--muted);font-weight:700;font-size:22px}
+    .sheet-body{display:grid;grid-template-columns: 360px 1fr;gap:18px;padding:16px}
+    .sheet-body img{width:100%;border-radius:12px;border:1px solid var(--ring)}
+    .facts{display:grid;gap:12px}
+    .facts h4{margin:0 0 6px 0}
+    .facts ul{margin:0;padding-left:18px}
+    .nutri{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .nutri .row{display:flex;justify-content:space-between;background:#0e1017;border:1px solid var(--ring);padding:8px 10px;border-radius:8px;font-size:14px}
+    .hint{margin-top:8px;color:var(--muted);font-size:12px}
+
+    /* ===== Responsive ===== */
+    @media (max-width:900px){
+      header{flex-direction:column;align-items:flex-start;gap:10px}
+      .toolbar{width:100%;justify-content:space-between;flex-wrap:wrap}
+      .input{flex:1;min-width:180px;width:100%}
+    }
+    @media (max-width:520px){
+      .wrap{padding:10px 16px 18px}
+      .title{font-size:19px}
+      .grid{grid-template-columns:repeat(2,minmax(148px,1fr));gap:10px}
+      .sheet{height:100dvh;border-radius:16px 16px 0 0;display:grid;grid-template-rows:auto 1fr}
+      .sheet-head{position:sticky;top:0;z-index:1}
+      .sheet-body{grid-template-columns:1fr;padding:12px;overflow:auto;-webkit-overflow-scrolling:touch}
+      .sheet-body img{max-height:220px;object-fit:cover}
+    }
+    @media (max-width:340px){
+      .grid{grid-template-columns:1fr}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .card:hover,.btn:hover,.chip:hover,.card:hover .card-img img{transform:none}
+    }
+
+    /* ===== Utility ===== */
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <div class="header-bg" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" title="Logo">
+          <img src="logo.png" alt="Logo sklepu" loading="lazy" />
+        </div>
+        <div>
+          <div class="title">Świadome zakupy przy Ladzie Tradycyjnej!</div>
+          <div class="subtitle">Kliknij kafelek lub wyszukaj, aby poznać skład i wartości odżywcze naszych produktów</div>
+        </div>
+      </div>
+
+      <!-- Tabbar -->
+      <nav class="tabbar" role="tablist" aria-label="Widoki">
+        <button id="tab-products" class="tab" role="tab" aria-selected="true" aria-controls="view-products">Produkty</button>
+        <button id="tab-suppliers" class="tab" role="tab" aria-selected="false" aria-controls="view-suppliers">Dostawcy regionalni </button>
+      </nav>
+
+      <!-- Toolbar tylko dla zakładki „Produkty” -->
+      <div class="toolbar" role="toolbar" aria-label="Filtry i wyszukiwanie" id="toolbar-products">
+        <label class="input" title="Szukaj po nazwie">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 105.293 14.293l3.707 3.707 1.414-1.414-3.707-3.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/></svg>
+          <input id="search" placeholder="Szukaj produktu… (np. szynka)" autocomplete="off" inputmode="search" aria-label="Wyszukaj produkt" />
+        </label>
+        <button id="resetBtn" class="btn" type="button">Wyczyść</button>
+        <div id="cats" class="filters" aria-label="Kategorie"></div>
+      </div>
+    </header>
+
+    <main>
+      <!-- VIEW: Produkty -->
+      <section id="view-products" role="tabpanel" aria-labelledby="tab-products">
+        <div id="grid" class="grid" aria-live="polite"></div>
+        <p id="empty" class="hint" hidden>Brak wyników. Spróbuj innego zapytania lub wyczyść filtry.</p>
+      </section>
+
+      <!-- VIEW: Dostawcy -->
+      <section id="view-suppliers" class="hidden" role="tabpanel" aria-labelledby="tab-suppliers">
+        <div class="suppliers" id="suppliers"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal (produkty) -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+    <div class="sheet">
+      <div class="sheet-head">
+        <span id="modalCategory" class="pill">Produkt</span>
+        <strong id="modalTitle">Nazwa produktu</strong>
+        <button class="close" id="closeModal" aria-label="Zamknij okno">×</button>
+      </div>
+      <div class="sheet-body">
+        <img id="modalImg" alt="Zdjęcie produktu" loading="lazy" />
+        <div class="facts">
+          <section>
+            <h4 id="modalDesc">Skład</h4>
+            <ul id="ingredients"></ul>
+          </section>
+          <section>
+            <h4>Wartości odżywcze (100 g)</h4>
+            <div id="nutri" class="nutri"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== DATA: produkty ===== */
+    const products = [
+      { id: 's1', name: 'Ser Edamski tłusty (OSM Kosów Lacki)', category: 'Sery', image: 's1.png', ingredients: ['mleko pasteryzowane','sól','kultury bakterii','podpuszczka mikrobiologiczna','stabilizator: chlorek wapnia'], nutrition: {'Energia':'1458 kJ / 351 kcal','Tłuszcz':'27 g','w tym kwasy nasycone':'18 g','Węglowodany':'1.0 g','w tym cukry':'<0.5 g','Białko':'26 g','Sól':'1.5 g'} },
+      { id: 's2', name: 'Ser Gouda tłusty (OSM Kosów Lacki)', category: 'Sery', image: 's2.png', ingredients: ['mleko pasteryzowane','sól','kultury bakterii','podpuszczka mikrobiologiczna','stabilizator: chlorek wapnia'], nutrition: {'Energia':'1458 kJ / 351 kcal','Tłuszcz':'27 g','w tym kwasy nasycone':'18 g','Węglowodany':'1.0 g','w tym cukry':'<0.5 g','Białko':'26 g','Sól':'1.5 g'} },
+      { id: 's3', name: 'Ser Gouda holenderska Światowid', category: 'Sery', image: 's3.png', ingredients: ['mleko pasteryzowane','sól','kultury bakterii mlekowych'], nutrition: {'Energia':'1575 kJ / 380 kcal','Tłuszcz':'32 g','w tym kwasy nasycone':'22 g','Węglowodany':'0 g','w tym cukry':'0 g','Białko':'23 g','Sól':'1.9 g'} },
+      { id: 's4', name: 'Ser Mimolette Światowid', category: 'Sery', image: 's4.png', ingredients: ['mleko pasteryzowane','sól','kultury bakterii mlekowych','barwnik: annato (norbiksyna)'], nutrition: {'Energia':'1361 kJ / 327 kcal','Tłuszcz':'24 g','w tym kwasy nasycone':'17 g','Węglowodany':'1 g','w tym cukry':'0 g','Białko':'26 g','Sól':'1.6 g'} },
+      { id: 's5', name: 'Ser Tylżycki Światowid', category: 'Sery', image: 's5.png', ingredients: ['mleko pasteryzowane','sól','kultury bakterii mlekowych'], nutrition: {'Energia':'1378 kJ / 334 kcal','Tłuszcz':'26 g','w tym kwasy nasycone':'17 g','Węglowodany':'0 g','w tym cukry':'0 g','Białko':'25 g','Sól':'1.2 g'} },
+
+      { id: 'sz1', name: 'Salami z suszonymi pomidorami Konecke', category: 'Wędliny', image: 'sz1.png', ingredients: ['mięso wieprzowe','mięso wołowe','sól','białko sojowe','dekstroza','przyprawy (zawierają seler i gorczycę)','ekstrakt przypraw','przeciwutleniacz: E301','barwnik: karmin','substancja konserwująca: E250','kultury starterowe','otoczone: żelatyna wieprzowa','suszone pomidory 3%','substancja konserwująca: E202'], nutrition: {'Energia':'1651 kJ / 398 kcal','Tłuszcz':'33 g','w tym kwasy nasycone':'13 g','Węglowodany':'2 g','w tym cukry':'2 g','Białko':'23 g','Sól':'4 g'} },
+      { id: 'sz2', name: 'Salami Rogal Konecke', category: 'Wędliny', image: 'sz2.png', ingredients: ['mięso wieprzowe','mięso wołowe','wołowa tkanka łączna','sól','białko sojowe','dekstroza','przyprawy (gorczyca, seler)','ekstrakty przypraw','przeciwutleniacz: E301','koncentrat buraka ćwikłowego','substancja konserwująca: E250','kultury starterowe'], nutrition: {'Energia':'1342 kJ / 324 kcal','Tłuszcz':'28 g','w tym kwasy nasycone':'11.2 g','Węglowodany':'1 g','w tym cukry':'1 g','Białko':'17 g','Sól':'2.8 g'} },
+      { id: 'sz3', name: 'Kiełbasa wiejska Płatek', category: 'Wędliny', image: 'sz3.png', ingredients: ['mięso wieprzowe 85%','mięso wołowe 10%','tłuszcz wieprzowy','sól','czosnek','cukier','pieprz','osłonka jadalna – jelito wieprzowe'], nutrition: {'Energia':'1508 kJ / 365 kcal','Tłuszcz':'34 g','w tym kwasy nasycone':'14 g','Węglowodany':'1.0 g','w tym cukry':'<0.5 g','Białko':'14 g','Sól':'1.7 g'} },
+      { id: 'sz4', name: 'Kiełbasa góralska krucha Płatek', category: 'Wędliny', image: 'sz4.png', ingredients: ['mięso wieprzowe','peklosól (sól, azotyn sodu)','przyprawy','aromaty','wzmacniacz smaku: glutaminian monosodowy','regulator kwasowości: lakton kwasu glukonowego','sól','osłonka jadalna – jelito wieprzowe','barwnik: krew wieprzowa'], nutrition: {'Energia':'1504 kJ / 363 kcal','Tłuszcz':'32 g','w tym kwasy nasycone':'13 g','Węglowodany':'1.3 g','w tym cukry':'0.7 g','Białko':'17 g','Sól':'2.3 g'} },
+      { id: 'sz5', name: 'Szynka góralska Płatek', category: 'Wędliny', image: 'sz5.png', ingredients: ['mięso wieprzowe z szynki 93%','peklosól (sól, azotyn sodu)','glukoza','maltodekstryna','stabilizator: trifosforany','wzmacniacz smaku: glutaminian monosodowy','białko wieprzowe','sól','przeciwutleniacz: izoaskorbinian sodu','hydrolizat białka kukurydzianego','aromaty','aromat dymu wędzarniczego'], nutrition: {'Energia':'593 kJ / 142 kcal','Tłuszcz':'7.5 g','w tym kwasy nasycone':'3.1 g','Węglowodany':'0.6 g','w tym cukry':'<0.5 g','Białko':'18 g','Sól':'2.3 g'} },
+
+      { id: 'r1', name: 'Szynka z liściem (PAMSO)', category: 'Regionalne', image: 'r1.png', ingredients: ['szynka wieprzowa bez kości 78%','woda','stabilizatory: E451, E452','substancje zagęszczające: E407, E407a','wzmacniacz smaku: E621','aromaty (w tym aromat dymu wędzarniczego, ekstrakty drożdżowe)','białko wieprzowe kolagenowe','przeciwutleniacz: E301','sól','błonnik bambusowy','cukry (glukoza, maltodekstryna)','przyprawy (m.in. cebula, lubczyk)','hydrolizowane białko sojowe','substancja konserwująca: E250'], nutrition: {'Energia':'436 kJ / 103 kcal','Tłuszcz':'2.3 g','w tym kwasy nasycone':'0.2 g','Węglowodany':'0.7 g','w tym cukry':'0.7 g','Białko':'20.2 g','Sól':'2.5 g'} },
+      { id: 'r2', name: 'Kiełbasa Mnicha (PAMSO)', category: 'Regionalne', image: 'r2.png', ingredients: ['mięso wieprzowe','krew wieprzowa','sól','wzmacniacz smaku: glutaminian monosodowy','cukier','glukoza','przyprawy i ekstrakty','przeciwutleniacze: kwas askorbinowy, askorbinian sodu','ekstrakt papryki','zioła prowansalskie','stabilizatory: difosforany, trifosforany, polifosforany','barwnik: karmel','warzywa w zmiennych proporcjach (m.in. pasternak, marchew, por, curry – zawiera gorczycę, kurkuma, nać pietruszki, cebula)','substancja konserwująca: azotyn sodu','osłonka wieprzowa jadalna'], nutrition: {'Energia':'1140 kJ / 275 kcal','Tłuszcz':'22.3 g','w tym kwasy nasycone':'9.5 g','Węglowodany':'1.3 g','w tym cukry':'1.3 g','Białko':'17.1 g','Sól':'2.0 g'} },
+      { id: 'r3', name: 'Szynka krucha (PAMSO)', category: 'Regionalne', image: 'r3.png', ingredients: ['szynka wieprzowa','maltodekstryna','substancja zagęszczająca: przetworzone wodorosty Eucheuma','cukier','sól','białko wieprzowe','przeciwutleniacz: izoaskorbinian sodu','aromat','substancja konserwująca: azotyn sodu'], nutrition: {'Energia':'501 kJ / 119 kcal','Tłuszcz':'2.2 g','w tym kwasy nasycone':'0.1 g','Węglowodany':'1.9 g','w tym cukry':'0.8 g','Białko':'22.8 g','Sól':'2.1 g'} },
+      { id: 'r4', name: 'Rolada z kurczaka ze szpinakiem (PAMSO)', category: 'Regionalne', image: 'r4.png', ingredients: ['mięso drobiowe z kurczaka','szpinak 11%','mięso drobiowe z indyka','sól','żelatyna wieprzowa','cukier','wzmacniacze smaku: glutaminian monosodowy, 5-rybonukleotydy disodowe','aromaty (zawierają gluten, mleko – laktozę)','stabilizatory: difosforany, trifosforany, polifosforany, mleczan sodu','glukoza','skrobia modyfikowana','białko wieprzowe','przeciwutleniacz: izoaskorbinian sodu','przyprawy i ekstrakty (zawierają siarczyny)','białko sojowe','substancja przeciwzbrylająca: dwutlenek krzemu','tkanka łączna drobiowa','substancja konserwująca: azotyn sodu'], nutrition: {'Energia':'794 kJ / 191 kcal','Tłuszcz':'13.1 g','w tym kwasy nasycone':'3.9 g','Węglowodany':'0.7 g','w tym cukry':'0.7 g','Białko':'17.3 g','Sól':'2.1 g'} },
+      { id: 'r5', name: 'Paryżanki (Pekpol Ostrołęka)', category: 'Regionalne', image: 'r5.png', ingredients: ['mięso 72% (wieprzowe 67%, z kurczaka 5%)','woda','tłuszcz wieprzowy','skrobia ziemniaczana','białko sojowe','regulatory kwasowości: octan potasu, mleczan potasu','stabilizatory: cytryniany sodu, trifosforany','przeciwutleniacze: kwas askorbinowy, izoaskorbinian sodu, kwas izoaskorbinowy','hydrolizowane białko roślinne (kukurydza, rzepak)','białko wieprzowe','wzmacniacz smaku: glutaminian monosodowy','aromaty','przyprawy i ekstrakty (seler, gorczyca)','glukoza','substancja konserwująca: azotyn sodu'], nutrition: {'Energia':'1205 kJ / 291 kcal','Tłuszcz':'25 g','w tym kwasy nasycone':'10 g','Węglowodany':'1.1 g','w tym cukry':'0.8 g','Białko':'13 g','Sól':'2.1 g'} },
+
+      { id: 'g1', name: 'Pierogi ruskie (luz)', category: 'Garmażerka', image: 'g1.png', ingredients: ['ziemniaki 30.6%','mąka pszenna','woda','twaróg półtłusty 12.2% (mleko pasteryzowane z laktozą, kultury mleczarskie)','olej rzepakowy','cebula','jaja','sól','pieprz','sorbinian potasu E202'], nutrition: {'Energia':'826 kJ / 196 kcal','Tłuszcz':'6.4 g','w tym kwasy nasycone':'1.0 g','Węglowodany':'27 g','w tym cukry':'1.3 g','Błonnik':'1.4 g','Białko':'7.0 g','Sól':'1.6 g'} },
+      { id: 'g2', name: 'Pierogi z mięsem (luz)', category: 'Garmażerka', image: 'g2.png', ingredients: ['mięso wieprzowe 35.4%','mąka pszenna','woda','mięso wołowe 12.4%','cebula','olej rzepakowy','jaja','sól','susz warzywny (marchew, pietruszka, seler)','czosnek','majeranek','pieprz','lubczyk','sorbinian potasu E202'], nutrition: {'Energia':'1179 kJ / 282 kcal','Tłuszcz':'17 g','w tym kwasy nasycone':'6.3 g','Węglowodany':'20 g','w tym cukry':'0.8 g','Błonnik':'0.7 g','Białko':'12 g','Sól':'1.3 g'} },
+      { id: 'g3', name: 'Pierogi z serem (luz)', category: 'Garmażerka', image: 'g3.png', ingredients: ['twaróg półtłusty 41.9% (mleko pasteryzowane z laktozą, kultury bakterii)','mąka pszenna','woda','cukier','żółtka jaj','jaja','olej rzepakowy','sól','cukier wanilinowy (cukier, etylowanilina)','sorbinian potasu E202'], nutrition: {'Energia':'735 kJ / 174 kcal','Tłuszcz':'3.2 g','w tym kwasy nasycone':'1.3 g','Węglowodany':'26 g','w tym cukry':'6.9 g','Błonnik':'0.6 g','Białko':'10 g','Sól':'0.59 g'} },
+      { id:'g4', name:'Krokiety z mięsem (luz)', category:'Garmażerka', image:'g4.png', ingredients:['mięso wieprzowe 29.8%','mąka pszenna','woda','mięso wołowe 10.5%','bułka tarta (mąka pszenna, woda, sól, drożdże)','olej rzepakowy','cebula','mleko z laktozą','jaja','sól','susz warzywny (marchew, pietruszka, seler)','czosnek','majeranek','pieprz','lubczyk','sorbinian potasu E202'], nutrition:{'Energia':'1286 kJ / 308 kcal','Tłuszcz':'18 g','w tym kwasy nasycone':'6.5 g','Węglowodany':'23 g','w tym cukry':'1.1 g','Błonnik':'1.0 g','Białko':'13 g','Sól':'1.2 g'} }
+    ];
+
+    /* ===== DATA: dostawcy (z logo) ===== */
+    const suppliers = [
+      {
+        id:'pamso',
+        name:'PAMSO – Pabianickie Mięso',
+        logo:'pamso.png',
+        desc:'Regionalny producent wędlin i mięs z centralnej Polski. Specjalizuje się w klasycznych recepturach i krótkiej liście składników, łącząc metody rzemieślnicze z kontrolą jakości.'
+      },
+      {
+        id:'prosiaczek',
+        name:'Prosiaczek',
+        logo:'prosiaczek.png',
+        desc:'Rodzinna przetwórnia bazująca na lokalnych dostawach surowca. W ofercie wyroby garmażeryjne i wędliny pieczone, przygotowywane w krótkich partiach.'
+      },
+      {
+        id:'wierzejki',
+        name:'Wierzejki',
+        logo:'wierzejki.png',
+        desc:'Zakład mięsny znany z produktów inspirowanych kuchnią Podlasia. Stawia na stabilne parametry i powtarzalność smaku w całej linii asortymentu.'
+      },
+      {
+        id:'koldras',
+        name:'Kołdras',
+        logo:'koldras.png',
+        desc:'Niewielki, regionalny wytwórca produktów mięsnych i delikatesowych. Rozpoznawalny za wędzonki o wyrazistym aromacie oraz krótkie serie sezonowe.'
+      }
+    ];
+
+    /* ===== HELPERS & STATE ===== */
+    const $  = (sel,root=document)=>root.querySelector(sel);
+    const $$ = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
+    const diacritics = (s='') => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const escapeHtml = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const state = {
+      q:new URLSearchParams(location.search).get('q')||'',
+      cat:new URLSearchParams(location.search).get('cat')||'Wszystko',
+      tab:(new URLSearchParams(location.search).get('tab')||'products') // 'products' | 'suppliers'
+    };
+
+    /* ===== ELEMENTS ===== */
+    const grid=$('#grid'), modal=$('#modal'), closeModalBtn=$('#closeModal'),
+          modalTitle=$('#modalTitle'), modalCategory=$('#modalCategory'),
+          modalImg=$('#modalImg'), ingredientsEl=$('#ingredients'),
+          nutriEl=$('#nutri'), searchInput=$('#search'), resetBtn=$('#resetBtn'),
+          catsWrap=$('#cats'), emptyMsg=$('#empty'),
+          viewProducts=$('#view-products'), viewSuppliers=$('#view-suppliers'),
+          tabProducts=$('#tab-products'), tabSuppliers=$('#tab-suppliers'),
+          toolbarProducts=$('#toolbar-products'), suppliersWrap=$('#suppliers');
+
+    /* ===== CATEGORY CHIPS ===== */
+    const categories=['Wszystko',...Array.from(new Set(products.map(p=>p.category)))];
+    categories.forEach(cat=>{
+      const b=document.createElement('button');
+      b.className='chip'; b.type='button';
+      b.setAttribute('aria-pressed', String(state.cat===cat));
+      b.textContent=cat;
+      b.addEventListener('click', ()=>{
+        state.cat=cat; updateURL(); renderProducts();
+        $$('.chip',catsWrap).forEach(c=>c.setAttribute('aria-pressed', String(c.textContent===cat)));
+      });
+      catsWrap.appendChild(b);
+    });
+
+    /* ===== RENDER: PRODUCTS ===== */
+    function renderProducts(){
+      const q=diacritics(state.q.trim().toLowerCase());
+      const cat=state.cat;
+      const items=products.filter(p =>
+        (cat==='Wszystko' || p.category===cat) &&
+        (!q || diacritics(p.name.toLowerCase()).includes(q) || p.ingredients.some(i=>diacritics(i.toLowerCase()).includes(q)))
+      );
+
+      grid.innerHTML=''; emptyMsg.hidden = items.length!==0;
+      const frag=document.createDocumentFragment();
+
+      items.forEach(p=>{
+        const card=document.createElement('article');
+        card.className='card'; card.setAttribute('tabindex','0'); card.setAttribute('role','button');
+        card.setAttribute('aria-label', `${p.name}. Otwórz szczegóły`);
+        const highlighted=highlight(p.name,q);
+        card.innerHTML=`
+          <div class="card-img">${p.image?`<img alt="${escapeHtml(p.name)}" src="${p.image}" loading="lazy">`:''}</div>
+          <div class="card-body">
+            <h3>${highlighted}</h3>
+            <span class="badge">${p.category}</span>
+          </div>`;
+        card.addEventListener('click',()=>openProduct(p));
+        card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openProduct(p);}});
+        frag.appendChild(card);
+      });
+      grid.appendChild(frag);
+    }
+
+    function highlight(text,q){
+      if(!q) return escapeHtml(text);
+      const plain=diacritics(text.toLowerCase());
+      const i=plain.indexOf(q); if(i===-1) return escapeHtml(text);
+      const e=i+q.length;
+      return escapeHtml(text.slice(0,i))+'<mark>'+escapeHtml(text.slice(i,e))+'</mark>'+escapeHtml(text.slice(e));
+    }
+
+    function openProduct(p){
+      modalTitle.textContent=p.name;
+      modalCategory.textContent=p.category||'Produkt';
+      modalImg.src=p.image||''; modalImg.alt=`Zdjęcie: ${p.name}`;
+
+      ingredientsEl.innerHTML=''; (p.ingredients||[]).forEach(i=>{
+        const li=document.createElement('li'); li.textContent=i; ingredientsEl.appendChild(li);
+      });
+
+      nutriEl.innerHTML=''; const n=p.nutrition||{};
+      Object.keys(n).forEach(k=>{
+        const row=document.createElement('div'); row.className='row';
+        row.innerHTML=`<span>${escapeHtml(k)}</span><strong>${escapeHtml(n[k])}</strong>`;
+        nutriEl.appendChild(row);
+      });
+
+      modal.classList.add('open'); closeModalBtn.focus();
+      history.replaceState(null,'',`#${encodeURIComponent(p.id)}`);
+    }
+
+    function closeModal(){
+      modal.classList.remove('open');
+      if(location.hash) history.replaceState(null,'',location.pathname+location.search);
+    }
+    closeModalBtn.addEventListener('click',closeModal);
+    modal.addEventListener('click',e=>{if(e.target===modal) closeModal();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape' && modal.classList.contains('open')) closeModal();});
+
+    /* ===== SEARCH (produkty) ===== */
+    function applyFilter(){ state.q=searchInput.value; updateURL(); renderProducts(); }
+    const debounced=(fn,ms=140)=>{let t; return(...a)=>{clearTimeout(t); t=setTimeout(()=>fn(...a),ms);} };
+    searchInput.addEventListener('input',debounced(applyFilter,120));
+    resetBtn.addEventListener('click',()=>{
+      searchInput.value=''; state.q=''; state.cat='Wszystko'; updateURL(); renderProducts();
+      searchInput.focus(); setPressedChip('Wszystko');
+    });
+    function setPressedChip(cat){ $$('.chip',catsWrap).forEach(c=>c.setAttribute('aria-pressed', String(c.textContent===cat))); }
+
+    /* ===== RENDER: SUPPLIERS (z logo) ===== */
+    function renderSuppliers(){
+      suppliersWrap.innerHTML='';
+      const frag=document.createDocumentFragment();
+      suppliers.forEach(s=>{
+        const art=document.createElement('article');
+        art.className='sup-card';
+        art.innerHTML=`
+          <div class="sup-card__head">
+            ${s.logo ? `
+              <div class="sup-card__logo">
+                <img src="${s.logo}" alt="Logo: ${escapeHtml(s.name)}" loading="lazy">
+              </div>` : ''
+            }
+            <h3>${escapeHtml(s.name)}</h3>
+          </div>
+          <p>${escapeHtml(s.desc)}</p>
+        `;
+        frag.appendChild(art);
+      });
+      suppliersWrap.appendChild(frag);
+    }
+
+    /* ===== TABS ===== */
+    function switchTab(tab){
+      state.tab = tab; // 'products' | 'suppliers'
+      const isProducts = tab==='products';
+
+      // aria
+      tabProducts.setAttribute('aria-selected', String(isProducts));
+      tabSuppliers.setAttribute('aria-selected', String(!isProducts));
+
+      // views
+      viewProducts.classList.toggle('hidden', !isProducts);
+      viewSuppliers.classList.toggle('hidden', isProducts);
+
+      // toolbar tylko w produktach
+      toolbarProducts.classList.toggle('hidden', !isProducts);
+
+      updateURL();
+
+      if(isProducts){ renderProducts(); }
+      else { renderSuppliers(); }
+    }
+    tabProducts.addEventListener('click',()=>switchTab('products'));
+    tabSuppliers.addEventListener('click',()=>switchTab('suppliers'));
+
+    /* ===== URL SYNC ===== */
+    function updateURL(){
+      const u=new URL(location);
+      if(state.q) u.searchParams.set('q',state.q); else u.searchParams.delete('q');
+      if(state.cat && state.cat!=='Wszystko') u.searchParams.set('cat',state.cat); else u.searchParams.delete('cat');
+      u.searchParams.set('tab',state.tab);
+      history.replaceState(null,'',u);
+    }
+
+    /* ===== INIT ===== */
+    (function init(){
+      setPressedChip(state.cat);
+      switchTab(state.tab);
+
+      if(location.hash){
+        const id = decodeURIComponent(location.hash.slice(1));
+        const p = products.find(x => x.id === id);
+        if(p){ switchTab('products'); openProduct(p); }
+      }
+      searchInput.value = state.q;
+    })();
+  </script>
+</body>
+</html>
